@@ -57,7 +57,7 @@
         <path d="M6 9V6a4 4 0 018 0v3" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <div>
-        <h1>Simulador fotovoltaico</h1>
+        <h1>Simulador fotovoltaico (versión educativa)</h1>
         <div class="muted">Introduce parámetros y observa la energía estimada por día, mes y año.</div>
       </div>
     </header>
@@ -180,7 +180,7 @@
         </div>
 
         <div class="chart card" style="margin-top:12px;padding:10px;background:#000;">
-          <div class="muted">Producción estimada por mes en KWh</div>
+          <div class="muted">Producción estimada por mes</div>
           <svg id="bars" width="100%" height="160"></svg>
         </div>
 
@@ -204,14 +204,26 @@
     const n = (id)=>Number(qs(id).value);
     function daysInMonth(m){ return new Date(2024,m,0).getDate(); }
 
+    /* ---------------------------
+       NUEVA ESTACIONALIDAD REALISTA
+    ---------------------------- */
     function seasonFactors(lat){
-      const base=[];
-      for(let i=0;i<12;i++){
-        const theta=(i/12)*2*Math.PI;
-        base.push(1+0.25*Math.sin(theta - (lat/90)));
-      }
-      const avg=base.reduce((a,b)=>a+b,0)/12;
-      return base.map(x=>x/avg);
+      const factors = [
+        1.18, // Ene
+        1.12, // Feb
+        1.05, // Mar
+        0.90, // Abr
+        0.72, // May
+        0.63, // Jun
+        0.68, // Jul
+        0.82, // Ago
+        0.95, // Sep
+        1.05, // Oct
+        1.12, // Nov
+        1.20  // Dic
+      ];
+      const avg = factors.reduce((a,b)=>a+b,0)/12;
+      return factors.map(f => f / avg);
     }
 
     function calculate(){
@@ -294,11 +306,10 @@
     }
 
     qs('#calc').addEventListener('click',()=>{ calculate(); });
-    qs('#reset').addEventListener('click',()=>{
-      location.reload();
-    });
+    qs('#reset').addEventListener('click',()=>{ location.reload(); });
 
     window.addEventListener('load',()=>{ calculate(); });
   </script>
 </body>
 </html>
+
